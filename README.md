@@ -74,3 +74,32 @@ If a model isn't available on your account, change it to one that is. Set **Reas
 
 - Many places require consent from everyone on a call before it's recorded or transcribed. Check the laws where you and the interviewer are, and the company's interview policy.
 - Each session sends audio to your transcription provider and transcript text to OpenAI, so it costs money on both.
+
+## Command reference
+
+Run from `C:\Users\johne\source\interview-copilot` in PowerShell or the VS Code terminal.
+
+| Command | What it does |
+| --- | --- |
+| `npm install` | Install everything. Run once, and again whenever `package.json` changes |
+| `npm start` | Open the app. Use the Demo / Live switch at the top of the overlay |
+| `npm run demo` | Open the app already in Demo mode, playing a scripted conversation |
+| `npm run check` | Quick offline tests (no keys used) |
+| `npm run live-test` | Test the real OpenAI + AssemblyAI calls with your keys |
+| `npm run live-test -- --research "Name" "Company"` | Same, plus a web research test |
+| `npm run dist:win` | Build an installable Windows app into `dist/` |
+
+Detailed logs while the app runs:
+
+```
+$env:COPILOT_DEBUG=1; npm start
+```
+
+### Keyboard shortcuts (overlay open)
+
+| Keys | Action |
+| --- | --- |
+| Ctrl+Shift+H | Show / hide the overlay |
+| Ctrl+Shift+1 | Open / close Social |
+| Ctrl+Shift+2 | Open / close Technical |
+| Ctrl+Shift+0 | Close panels |
