@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>Interview Copilot</title>
+<link rel="stylesheet" href="setup.css">
+</head>
+<body>
+<div class="app">
+  <nav class="side">
+    <div class="brand">
+      <svg viewBox="0 0 24 24"><path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/></svg>
+      <span>Interview Copilot</span>
+    </div>
+    <button class="nav active" data-view="interview">Interview</button>
+    <button class="nav" data-view="settings">Settings</button>
+    <div class="side-foot">
+      <div class="kbd-row"><kbd id="modKey">Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> show / hide overlay</div>
+      <div class="kbd-row"><kbd class="mk">Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Social</div>
+      <div class="kbd-row"><kbd class="mk">Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Technical</div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- INTERVIEW -->
+    <section id="view-interview" class="view">
+      <header class="view-head">
+        <div>
+          <h1>Interview</h1>
+          <p class="muted">Who you're talking to and what the role is. Run research before the call, then start the overlay.</p>
+        </div>
+        <div class="head-actions">
+          <span id="sessionState" class="muted small"></span>
+          <button id="btnStart" class="btn primary">Start call assistant</button>
+        </div>
+      </header>
+      <div id="startError" class="alert hidden" role="alert"></div>
+
+      <div class="grid2">
+        <div class="field"><label for="interviewerName">Interviewer name</label><input id="interviewerName" data-profile type="text" placeholder="e.g. Jordan Lee"></div>
+        <div class="field"><label for="interviewerRole">Their role</label><input id="interviewerRole" data-profile type="text" placeholder="e.g. Engineering Manager, Platform"></div>
+        <div class="field"><label for="company">Company</label><input id="company" data-profile type="text" placeholder="Company name"></div>
+        <div class="field"><label for="jobTitle">Role you're interviewing for</label><input id="jobTitle" data-profile type="text" placeholder="e.g. Senior Backend Engineer"></div>
+        <div class="field"><label for="interviewerLinkedin">Interviewer LinkedIn URL <span class="opt">optional</span></label><input id="interviewerLinkedin" data-profile type="url" placeholder="https://www.linkedin.com/in/…"></div>
+        <div class="field"><label for="companyUrl">Company website <span class="opt">optional</span></label><input id="companyUrl" data-profile type="url" placeholder="https://…"></div>
+      </div>
+      <div class="field"><label for="jobDescription">Job description <span class="opt">optional · helps technical answers</span></label><textarea id="jobDescription" data-profile rows="4" placeholder="Paste the job description"></textarea></div>
+      <div class="field"><label for="myBackground">Your background <span class="opt">optional · résumé highlights, stack, projects</span></label><textarea id="myBackground" data-profile rows="4" placeholder="So answers can reference your real experience"></textarea></div>
+
+      <div class="research-head">
+        <h2>Social research</h2>
+        <div class="head-actions">
+          <span id="researchState" class="muted small"></span>
+          <button id="btnResearch" class="btn">Run research</button>
+        </div>
+      </div>
+      <div id="researchError" class="alert hidden" role="alert"></div>
+      <div id="researchPreview" class="preview"></div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="view-settings" class="view hidden">
+      <header class="view-head">
+        <div>
+          <h1>Settings</h1>
+          <p class="muted">Keys are encrypted with your OS keychain and only sent to the provider they belong to.</p>
+        </div>
+        <div class="head-actions"><span id="saveState" class="muted small"></span><button id="btnSave" class="btn primary">Save settings</button></div>
+      </header>
+
+      <h2>API keys</h2>
+      <div class="grid2">
+        <div class="field">
+          <label for="openaiKey">OpenAI API key <span class="opt">required · answers + research</span></label>
+          <div class="row"><input id="openaiKey" type="password" autocomplete="off"><button id="btnTestOpenAI" class="btn">Test</button></div>
+          <span id="openaiKeyHint" class="hint"></span>
+        </div>
+        <div class="field">
+          <label for="assemblyaiKey">AssemblyAI API key <span class="opt">for AssemblyAI transcription</span></label>
+          <input id="assemblyaiKey" type="password" autocomplete="off">
+          <span id="assemblyaiKeyHint" class="hint"></span>
+        </div>
+      </div>
+
+      <h2>Transcription</h2>
+      <div class="grid2">
+        <div class="field">
+          <label for="transcriptionProvider">Provider</label>
+          <select id="transcriptionProvider" data-setting>
+            <option value="assemblyai">AssemblyAI streaming (built-in turn detection)</option>
+            <option value="openai">OpenAI realtime transcription</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="openaiTranscribeModel">OpenAI transcription model</label>
+          <input id="openaiTranscribeModel" data-setting type="text">
+        </div>
+        <div class="field">
+          <label for="assemblyaiSpeechModel">AssemblyAI speech model <span class="opt">blank = provider default</span></label>
+          <input id="assemblyaiSpeechModel" data-setting type="text" placeholder="e.g. universal-streaming-english">
+        </div>
+        <label class="check"><input id="diarize" data-setting type="checkbox"> Tell interviewer voices apart (AssemblyAI) — for panel interviews</label>
+        <div class="field">
+          <label for="silenceMs">End-of-turn silence (OpenAI only, ms)</label>
+          <input id="silenceMs" data-setting type="number" min="300" max="3000" step="50">
+        </div>
+      </div>
+
+      <h2>Audio</h2>
+      <div class="grid2">
+        <div class="field">
+          <label for="micDeviceId">Your microphone (“You”)</label>
+          <select id="micDeviceId" data-setting></select>
+        </div>
+        <div class="field">
+          <label for="interviewerSource">Call audio (“Interviewer”)</label>
+          <select id="interviewerSource" data-setting></select>
+        </div>
+      </div>
+      <p class="hint">Use headphones so your mic doesn't pick up the interviewer's voice. On macOS, "System audio" needs macOS 13+ and audio-capture permission; otherwise route call audio through a virtual device like BlackHole and choose it here.</p>
+      <div class="row gap"><button id="btnRefreshDevices" class="btn">Refresh devices</button><span id="micMeterWrap" class="meter"><span id="micMeter"></span></span><button id="btnTestMic" class="btn">Test mic</button></div>
+      <div class="field narrow">
+        <label for="vadThreshold">Speech sensitivity (OpenAI only; lower = more sensitive)</label>
+        <input id="vadThreshold" data-setting type="number" min="0.002" max="0.1" step="0.001">
+      </div>
+
+      <h2>AI models</h2>
+      <div class="grid2">
+        <div class="field"><label for="liveModel">Live answers model <span class="opt">fast</span></label><input id="liveModel" data-setting type="text"></div>
+        <div class="field"><label for="researchModel">Research model <span class="opt">must support web search</span></label><input id="researchModel" data-setting type="text"></div>
+        <div class="field">
+          <label for="reasoningEffort">Reasoning effort</label>
+          <select id="reasoningEffort" data-setting>
+            <option value="">Off (non-reasoning models)</option>
+            <option value="minimal">Minimal</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+          </select>
+        </div>
+      </div>
+
+      <h2>Overlay</h2>
+      <div class="grid2">
+        <label class="check"><input id="hideFromScreenShare" data-setting type="checkbox"> Hide overlay from screen sharing &amp; recordings</label>
+        <label class="check"><input id="showTranscript" data-setting type="checkbox"> Show live transcript strip</label>
+        <div class="field">
+          <label for="glassOpacity">Glass opacity <span id="glassVal" class="opt"></span></label>
+          <input id="glassOpacity" data-setting type="range" min="0.25" max="0.9" step="0.05">
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="setup.js"></script>
+</body>
+</html>

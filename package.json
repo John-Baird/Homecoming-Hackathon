@@ -1,0 +1,44 @@
+{
+  "name": "interview-copilot",
+  "productName": "Interview Copilot",
+  "version": "0.1.0",
+  "description": "Transparent AI overlay for video-call interviews: live turn-aware transcript, social research and technical answers.",
+  "main": "src/main/main.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "demo": "electron . --demo",
+    "check": "node scripts/check.js",
+    "live-test": "node scripts/live-test.js",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "electron": "^44.4.3",
+    "electron-builder": "^26.15.3"
+  },
+  "build": {
+    "appId": "com.local.interviewcopilot",
+    "productName": "Interview Copilot",
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity",
+      "extendInfo": {
+        "NSMicrophoneUsageDescription": "Interview Copilot transcribes your microphone to follow the conversation.",
+        "NSAudioCaptureUsageDescription": "Interview Copilot transcribes the call audio to hear the interviewer.",
+        "NSScreenCaptureUsageDescription": "Needed by macOS to capture system audio from the call."
+      }
+    }
+  }
+}

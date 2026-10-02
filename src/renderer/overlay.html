@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob: mediastream:">
+<title>Interview Copilot Overlay</title>
+<link rel="stylesheet" href="overlay.css">
+</head>
+<body>
+  <!-- Status pill -->
+  <div id="status" class="glass hit">
+    <div class="mode-switch" role="group" aria-label="Mode">
+      <button id="modeDemo" class="mode-btn" aria-pressed="false" title="Scripted demo conversation — no audio or API calls">Demo</button>
+      <button id="modeLive" class="mode-btn" aria-pressed="false" title="Listen to your mic and the call">Live</button>
+    </div>
+    <div class="bars" id="bars"><span></span><span></span><span></span></div>
+    <span id="statusText">Starting…</span>
+    <span class="sep">·</span>
+    <span id="aiText" class="muted"></span>
+    <div class="pill-actions">
+      <button id="btnTranscript" class="icon-btn" aria-label="Toggle transcript" title="Show / hide transcript">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      </button>
+      <button id="btnSetup" class="icon-btn" aria-label="Open setup" title="Setup">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="error" class="glass hit hidden" role="alert"></div>
+
+  <!-- Side tabs -->
+  <div id="tabs">
+    <button class="tab glass hit" id="tabSocial" data-tab="social" aria-label="Social">
+      <svg viewBox="0 0 24 24" class="tab-icon social"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.3c2.1.7 3.5 2.6 3.5 5.7"/></svg>
+      <span class="tab-label">Social</span>
+      <span class="badge social hidden" id="badgeSocial"><span class="ring"></span><span class="num">0</span></span>
+    </button>
+    <button class="tab glass hit" id="tabTechnical" data-tab="technical" aria-label="Technical">
+      <svg viewBox="0 0 24 24" class="tab-icon technical"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg>
+      <span class="tab-label">Technical</span>
+      <span class="badge technical hidden" id="badgeTechnical"><span class="ring"></span><span class="num">0</span></span>
+    </button>
+
+    <!-- Session controls -->
+    <div class="controls glass hit" role="group" aria-label="Session controls">
+      <button id="btnRun" class="ctl start" aria-label="Start listening" title="Start / stop">
+        <svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg>
+        <span class="ctl-label">Start</span>
+      </button>
+      <button id="btnPause" class="ctl" aria-label="Pause listening" title="Pause / resume" disabled>
+        <svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg>
+        <span class="ctl-label">Pause</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Ping toast -->
+  <button id="toast" class="glass hit hidden">
+    <span class="toast-kicker" id="toastKicker"></span>
+    <span class="toast-text" id="toastText"></span>
+  </button>
+
+  <!-- Social panel -->
+  <section id="panelSocial" class="panel glass hit hidden social" aria-label="Social">
+    <header class="panel-head">
+      <div>
+        <h2>Social</h2>
+        <p class="muted">Interviewer and company context, ranked for this moment.</p>
+      </div>
+      <button class="icon-btn close" data-close aria-label="Close panel"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </header>
+    <div class="panel-body" id="socialBody"></div>
+  </section>
+
+  <!-- Technical panel -->
+  <section id="panelTechnical" class="panel glass hit hidden technical" aria-label="Technical">
+    <header class="panel-head">
+      <div>
+        <h2>Technical</h2>
+        <p class="muted">Answers to questions detected in the conversation, newest first.</p>
+      </div>
+      <button class="icon-btn close" data-close aria-label="Close panel"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </header>
+    <form id="askForm" class="ask">
+      <label for="askInput" class="sr-only">Ask privately</label>
+      <input id="askInput" type="text" placeholder="Ask privately… (only you see this)" autocomplete="off">
+      <button type="submit" class="ask-btn">Ask</button>
+    </form>
+    <div class="panel-body" id="techBody"></div>
+  </section>
+
+  <!-- Live transcript -->
+  <div id="transcript" class="glass">
+    <div class="tx-head"><span>Live transcript</span><span id="txSpeakers"></span></div>
+    <div id="txLines"></div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="overlay.js"></script>
+</body>
+</html>
